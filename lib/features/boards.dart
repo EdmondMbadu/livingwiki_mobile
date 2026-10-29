@@ -13,6 +13,7 @@ import 'board_editor.dart';
 import 'chat.dart';
 import 'create.dart';
 import 'voice.dart';
+import 'nearby_gems.dart';
 
 class BoardsScreen extends StatefulWidget {
   const BoardsScreen({super.key, this.initialFilter = 'Discover'});
@@ -485,16 +486,33 @@ class _BoardScreenState extends State<BoardScreen> {
                           }
                         },
                       ),
-                    SectionHeading(
-                      'One card. Another discovery.',
-                      subtitle: 'Take your time. There’s a story in every one.',
-                    ),
+                    if (b.kind == 'nearby-gems')
+                      NearbyGemsCollection(
+                        cards: cards,
+                        walking:
+                            mapValue(b.data['nearbyGems'])['travelMode'] ==
+                            'walking',
+                        onOpen: (card) => openScreen(
+                          context,
+                          CardScreen(board: b, card: card),
+                        ),
+                      ),
+                    if (b.kind != 'nearby-gems')
+                      SectionHeading(
+                        'One card. Another discovery.',
+                        subtitle:
+                            'Take your time. There’s a story in every one.',
+                      ),
                     if (cards.isEmpty)
                       const EmptyState(
                         title: 'A story in the making',
                         message: 'Cards will appear here as this board grows.',
                       ),
-                    for (var i = 0; i < cards.length; i++)
+                    for (
+                      var i = 0;
+                      b.kind != 'nearby-gems' && i < cards.length;
+                      i++
+                    )
                       Padding(
                         padding: const EdgeInsets.only(bottom: 18),
                         child: _StoryCard(

@@ -5,14 +5,14 @@ The native implementation uses the supplied web repository as its backend contra
 | Check | Result |
 | --- | --- |
 | Flutter static analysis | No issues |
-| Unit and widget tests | 24 tests covering schema/privacy, translation, stale edits, account-scoped saves, forms, navigation and responsive layouts |
-| Actual Firestore rules in a demo-project emulator | 5 checks passed: regular-user create, focused edit, ownership rejection, membership restriction and unlisted link access |
+| Unit and widget tests | 33 tests covering schema/privacy, translation, stale edits, account-scoped saves, forms, navigation and responsive layouts, nearby discovery contracts, location denial, selection and private saves |
+| Actual Firestore rules in a demo-project emulator | 10 checks passed: ordinary-board access plus private nearby-gems saves, edits, grant scope/ownership and guest denial |
 | Production public SDK/API smoke | 4 checks passed: wiki directory, full boards/cards, knowledge response, Off Grids directory |
-| iPhone 17 Pro / iOS 26.2 simulator integration | Passed: app initialization, real public directory data, city navigation, boards and account screens |
+| iPhone 17 Pro / iOS 26.2 simulator integration | Passed: app initialization, real public directory data, home-page Nearby Gems navigation, city navigation, boards and account screens |
 | Android debug package | Built successfully |
 | iOS simulator app | Built successfully |
 | Compiled web preview | Built successfully |
-| Phone browser visual inspection | Explore, Philadelphia wiki and public story gallery checked at 390 × 844 |
+| Phone browser visual inspection | Explore, Nearby Gems, Philadelphia wiki and public story gallery checked at 390 × 844 |
 
 ## Outputs
 

@@ -31,3 +31,11 @@ Automated tests exercise schema mapping, public filtering, edit ownership, stale
 The production smoke script is read-only and does not sign in, generate content, start voice calls, send messages or publish anything. Authenticated provider, payment, camera/gallery, microphone and real account write journeys require device acceptance. A passing analyzer or simulator build is not a claim that those external service workflows were exercised.
 
 Assets are reused from the supplied web repository. Newsreader licensing is bundled in `assets/fonts/newsreader-OFL.txt`; public-wiki asset attribution is bundled in `assets/images/ATTRIBUTIONS.md`. Maps credit OpenStreetMap contributors.
+
+## Nearby Gems device acceptance
+
+- On a physical iPhone and Android device, allow foreground location, deny it, and deny permanently; confirm a typed city/address remains available.
+- Turn location services off and confirm the app offers settings and manual search. No background location permission is requested.
+- With an existing signed-in account, search each travel range, adjust the 4–16 card target, review map/list results and estimated travel times, keep a subset, then reopen and edit the private board in My Boards.
+- Confirm directions use the selected walking/driving mode. The board retains place coordinates, never the user's search origin.
+- The callable/grant/save contract is covered by mocked discovery tests and the real Firestore rules in an isolated demo emulator. Production authenticated discovery was not exercised with a live account during implementation.

@@ -243,7 +243,8 @@ class _BoardEditorState extends State<BoardEditor> {
             ['active', 'trialing', 'paid'].contains(
               stringValue(profile['subscriptionStatus']).toLowerCase(),
             ) ||
-        widget.board?.visibility == 'private';
+        widget.board?.visibility == 'private' ||
+        widget.board?.kind == 'nearby-gems';
     return PopScope(
       canPop: saved || !dirty,
       onPopInvokedWithResult: (didPop, _) {

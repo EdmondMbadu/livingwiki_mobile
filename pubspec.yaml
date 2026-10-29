@@ -26,6 +26,8 @@ dependencies:
   latlong2: ^0.9.1
   app_links: ^6.4.1
   elevenlabs_agents: 0.6.1
+  geolocator: ^14.0.2
+  uuid: ^4.5.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

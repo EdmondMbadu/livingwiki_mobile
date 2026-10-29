@@ -6,6 +6,7 @@ Source reviewed: `/Users/edmondmbadu/repo/living-wiki`. Admin routes, platform a
 | --- | --- | --- |
 | Explore / all cities / discovery | Editorial home; searchable directory; city, university, topic, person and organization filters; pagination; map; real wiki landing pages | `app.routes.ts`, `atlas.service.ts`; `atlases` where `is_public == true` |
 | Picamo city guide | “Picamo Knows [city]” hero and original mascot, city campaign taglines, editable dinner/hidden-gem/afternoon prompts, Picamo Picks and local curiosity from published city boards; custom personas and universities retain their identity | `city-guide.ts`, `chat/chat.ts`, `chat/chat.html`; city listing rank order |
+| Find gems near me | Home doorway; on-foot, quick-drive and adventure ranges; 4–16 gems; interests; native location permissions and typed starting place; review, select, sort, map, directions; private board creation and existing editor | `discoverNearbyGems`; UUID draft and `nearby_gem_generation_grants`; `nearbyGems` and per-card route metadata |
 | Public board feed | Bounded summary queries, incremental pages, search, property and tour views | `public_board_summaries`, root/public constraints; `public-board-summary.ts` |
 | Personal boards | Ownership-scoped gallery; device bookmarks; board detail; cards, notes, nested boards, sources, places, shopping links, Spotify, YouTube and videos | `boards/boards.ts`; `boards.owner_user_id`, full-board documents |
 | Make / edit a board | Titles, descriptions, cover uploads, cards, drag reordering, audience selection, drafts, deletion with confirmation | Same snake-case owner and timestamps, camel-case presentation fields; focused Studio updates and nonce |
@@ -43,6 +44,6 @@ There are **two** Firestore databases in the Firebase project: `default` (Enterp
 
 Public browsing uses client SDKs and the deployed security rules. Backend functions handle public wiki access, chat limits, narration, translation, friendship changes, team membership and media grants. Client code does not replace these with direct privileged writes.
 
-New boards use `unlisted` as the default audience, visibly labeled “Anyone with the link.” Creating a public board is an explicit choice. The private choice follows the web app's current plan/status pairs. Drafts saved on the device remain on that device.
+New boards use `unlisted` as the default audience, visibly labeled “Anyone with the link.” Creating a public board is an explicit choice. The private choice follows the web app's current plan/status pairs. Nearby Gems boards follow the web's separate generation-grant path: they are created privately for regular signed-in users without a membership. The starting point is sent only for discovery and is not persisted on the board. Drafts saved on the device remain on that device.
 
 Auth/profile updates never contain `role`, subscription status, pricing plan or administrative permissions. Account changes clear private routes and restore the correct account-specific bookmarks.

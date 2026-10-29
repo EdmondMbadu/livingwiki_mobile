@@ -42,6 +42,8 @@
 	<string>661893013313-gt45ll6ghpr5jo2qa00erkt6285ku8dl.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>LivingWiki uses your location when you ask to find nearby gems. Your starting point is not saved on your board.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Talk with LivingWiki guides and stories using your microphone.</string>
 	<key>UIApplicationSceneManifest</key>

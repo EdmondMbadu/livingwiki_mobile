@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'models.dart';
+import 'nearby_gems.dart';
+import 'package:uuid/uuid.dart';
 
 class LivingRepository {
   LivingRepository({
@@ -480,9 +482,26 @@ class LivingRepository {
     required String kind,
     required List<WikiCard> cards,
     dynamic tourMeta,
+    NearbyGemsDraft? nearbyDraft,
   }) async {
     final user = auth.currentUser;
     requireUser();
+    if (original == null && kind == 'nearby-gems') {
+      if (nearbyDraft == null ||
+          nearbyDraft.ownerId != uid ||
+          nearbyDraft.metadata['generationGrantId'] != nearbyDraft.id ||
+          visibility != 'private' ||
+          cards.isEmpty ||
+          cards.any(
+            (c) => !nearbyDraft.cards.any((source) => source.id == c.id),
+          )) {
+        throw StateError('Reopen the nearby gems finder to create this board.');
+      }
+    } else if (nearbyDraft != null) {
+      throw StateError(
+        'This discovery can only be saved as a new nearby gems board.',
+      );
+    }
     if (original != null && original.ownerId != uid) {
       throw StateError('Only the owner can edit this board.');
     }
@@ -526,7 +545,7 @@ class LivingRepository {
       }
       return;
     }
-    final ref = db.collection('boards').doc();
+    final ref = db.collection('boards').doc(nearbyDraft?.id);
     final d = <String, dynamic>{
       'id': ref.id,
       'owner_user_id': uid,
@@ -543,8 +562,8 @@ class LivingRepository {
       'title': title,
       'description': description,
       'backNote': '',
-      'icon': 'dashboard_customize',
-      'tone': 'teal',
+      'icon': nearbyDraft == null ? 'dashboard_customize' : 'explore_nearby',
+      'tone': nearbyDraft == null ? 'teal' : 'green',
       'imageUrl': image,
       'logoUrl': '',
       'logoLinkUrl': '',
@@ -566,6 +585,7 @@ class LivingRepository {
       'narrationSecondsPerCard': 30,
       'stickers': [],
       'tourMeta': tourMeta,
+      if (nearbyDraft != null) 'nearbyGems': nearbyDraft.metadata,
       'insideCardsDisplay': 'nested',
       'showCardNumbers': true,
       'cards': cards.map((c) => c.data).toList(),
@@ -574,6 +594,63 @@ class LivingRepository {
       'server_updated_at': FieldValue.serverTimestamp(),
     };
     await ref.set(d);
+  }
+
+  Future<NearbyGemsDraft> discoverNearbyGems({
+    required NearbyRange range,
+    required int count,
+    String details = '',
+    String? manualLocation,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final owner = requireUser();
+    final id = const Uuid().v4();
+    final place = manualLocation?.trim() ?? '';
+    if (place.isEmpty &&
+        (latitude == null ||
+            longitude == null ||
+            !latitude.isFinite ||
+            !longitude.isFinite ||
+            latitude.abs() > 90 ||
+            longitude.abs() > 180)) {
+      throw StateError('Choose your location or enter a starting place.');
+    }
+    Json result;
+    try {
+      result = await call('discoverNearbyGems', {
+        'boardId': id,
+        'range': range.id,
+        'count': count.clamp(4, 16),
+        'details': details.trim().substring(
+          0,
+          details.trim().length.clamp(0, 500),
+        ),
+        if (place.isNotEmpty)
+          'manualLocation': place.substring(0, place.length.clamp(0, 240)),
+        if (place.isEmpty) ...{'latitude': latitude, 'longitude': longitude},
+      });
+    } on FirebaseFunctionsException catch (e) {
+      throw StateError(switch (e.code) {
+        'not-found' =>
+          'No strong matches were found. Try a wider travel range or another starting place.',
+        'invalid-argument' =>
+          'We could not use that starting place. Try a city, neighborhood, or full address.',
+        'resource-exhausted' =>
+          'You’ve reached the nearby search limit. Please try again later.',
+        'unauthenticated' => 'Sign in again to find nearby gems.',
+        'deadline-exceeded' =>
+          'The search took too long. Try again or choose another starting place.',
+        'failed-precondition' =>
+          'Nearby place search is temporarily unavailable. Please try again later.',
+        _ =>
+          'Nearby gems could not connect. Check your connection and try again.',
+      });
+    }
+    if (uid != owner) {
+      throw StateError('Your account changed. Please search again.');
+    }
+    return NearbyGemsDraft.fromResponse(id, owner, result);
   }
 
   Future<void> deleteBoard(Board board) async {

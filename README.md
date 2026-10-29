@@ -47,7 +47,7 @@ node scripts/public-smoke.mjs
 The rule compatibility test uses an isolated local **demo** project and the exact serializer payload emitted by Dart. It reads the existing web rules without deploying them or changing production. It requires Java 21+, Firebase CLI, and the sibling web app's installed Node dependencies:
 
 ```sh
-flutter test --dart-define=EXPORT_BOARD_FIXTURE=/tmp/livingwiki-mobile-board.json test/repository_test.dart
+flutter test --dart-define=EXPORT_BOARD_FIXTURE=/tmp/livingwiki-mobile-board.json --dart-define=EXPORT_NEARBY_FIXTURE=/tmp/livingwiki-nearby-board.json test/repository_test.dart test/nearby_gems_test.dart
 node scripts/check-firestore-rules.mjs
 ```
 

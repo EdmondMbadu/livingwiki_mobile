@@ -10,6 +10,7 @@ import 'atlas.dart';
 import 'boards.dart';
 import 'gems.dart';
 import 'chat.dart';
+import 'nearby_gems.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -122,6 +123,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 18),
+              const NearbyGemsDoorway(),
               const SizedBox(height: 22),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,

@@ -4,6 +4,7 @@ import 'package:livingwiki_mobile/main.dart' as app;
 import 'package:livingwiki_mobile/core/app_state.dart';
 import 'package:livingwiki_mobile/main.dart';
 import 'package:livingwiki_mobile/features/explore.dart';
+import 'package:livingwiki_mobile/features/nearby_gems.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,14 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(state.catalogError, isNull);
     expect(state.atlases, isNotEmpty);
+    await tester.ensureVisible(find.text('Find gems near me'));
+    await tester.tap(find.text('Find gems near me'));
+    await tester.pumpAndSettle();
+    expect(find.byType(NearbyGemsScreen), findsOneWidget);
+    expect(find.text('There’s wonder\nright around you.'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Cities').first);
     await tester.tap(find.text('Cities').first);
     await tester.pumpAndSettle();
     expect(find.byType(DirectoryScreen), findsOneWidget);
