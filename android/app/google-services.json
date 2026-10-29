@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "661893013313",
+    "project_id": "living-atlas-7622a",
+    "storage_bucket": "living-atlas-7622a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661893013313:android:a9ee8844e1004ad6614bc0",
+        "android_client_info": {
+          "package_name": "com.livingwiki.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "661893013313-rign3jf42cc7fmqp4vne0hj3jgs5t52e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.livingwiki.mobile",
+            "certificate_hash": "fe34ab4dd628402bf14b4f023d6f39d42c43fe8c"
+          }
+        },
+        {
+          "client_id": "661893013313-gt45ll6ghpr5jo2qa00erkt6285ku8dl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBskBawpup2IQd1VvQ1DoeLf91BGes-aV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "661893013313-gt45ll6ghpr5jo2qa00erkt6285ku8dl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "661893013313-kkqrag20m8472hr1kltprgi0glfkthik.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.livingwiki.mobile"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
