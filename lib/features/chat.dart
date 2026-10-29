@@ -4,6 +4,8 @@ import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../core/widgets.dart';
 import '../data/models.dart';
+import '../data/city_guide.dart';
+import 'city_guide.dart';
 import 'auth.dart';
 import 'explore.dart';
 import 'voice.dart';
@@ -13,11 +15,12 @@ class ChatScreen extends StatefulWidget {
     super.key,
     this.atlas,
     this.initialQuestion,
+    this.draftQuestion,
     this.threadId,
     this.initialMessages = const [],
   });
   final Atlas? atlas;
-  final String? initialQuestion, threadId;
+  final String? initialQuestion, draftQuestion, threadId;
   final List<Json> initialMessages;
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -34,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     atlas = widget.atlas;
+    input.text = widget.draftQuestion ?? '';
     threadId = widget.threadId;
     messages.addAll(widget.initialMessages);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -124,6 +128,7 @@ class _ChatScreenState extends State<ChatScreen> {
     state.selectAtlas(chosen);
     setState(() {
       atlas = chosen;
+      input.clear();
       threadId = null;
       messages.clear();
       error = null;
@@ -141,6 +146,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     atlas ??= widget.atlas ?? state.selectedAtlas;
+    final picamoCity = atlas != null && usesPicamoCityGuide(atlas!);
     return Scaffold(
       appBar: AppBar(
         title: InkWell(
@@ -240,65 +246,78 @@ class _ChatScreenState extends State<ChatScreen> {
                     ? ListView(
                         padding: const EdgeInsets.all(28),
                         children: [
-                          const SizedBox(height: 30),
-                          Center(
-                            child: ClipOval(
-                              child: Image.asset(
-                                'assets/images/picamo.webp',
-                                semanticLabel:
-                                    'Picamo, your curiosity companion',
-                                width: 90,
-                                height: 90,
-                                fit: BoxFit.cover,
-                              ),
+                          if (picamoCity) ...[
+                            PicamoCityHero(atlas: atlas!),
+                            const SizedBox(height: 20),
+                            PicamoCityStarters(
+                              atlas: atlas!,
+                              onSelected: (starter) {
+                                setState(() => input.text = starter.question);
+                              },
                             ),
-                          ),
-                          const SizedBox(height: 26),
-                          const Center(child: Eyebrow('Explore with Picamo')),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Good questions.\nUnexpected places.',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.displayMedium,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            atlas == null
-                                ? 'Meet Picamo, your curiosity companion.\nChoose a wiki, then follow your curiosity.'
-                                : 'Explore ${atlas!.name} with Picamo.\nAsk about the people, places, and stories within.',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: Palette.muted),
-                          ),
-                          const SizedBox(height: 26),
-                          if (atlas == null)
-                            FilledButton.icon(
-                              onPressed: chooseAtlas,
-                              icon: const Icon(Icons.public),
-                              label: const Text('Choose a wiki'),
-                            )
-                          else ...[
-                            for (final q in [
-                              'What should I discover first?',
-                              'Tell me a story most people don’t know.',
-                              'Help me plan an afternoon.',
-                            ])
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: OutlinedButton(
-                                  onPressed: () => send(q),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          q,
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                      ),
-                                      const Icon(Icons.north_east, size: 16),
-                                    ],
-                                  ),
+                          ] else ...[
+                            const SizedBox(height: 30),
+                            Center(
+                              child: ClipOval(
+                                child: Image.asset(
+                                  'assets/images/picamo.webp',
+                                  semanticLabel:
+                                      'Picamo, your curiosity companion',
+                                  width: 90,
+                                  height: 90,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
+                            ),
+                            const SizedBox(height: 26),
+                            const Center(child: Eyebrow('Explore with Picamo')),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Good questions.\nUnexpected places.',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.displayMedium,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              atlas == null
+                                  ? 'Meet Picamo, your curiosity companion.\nChoose a wiki, then follow your curiosity.'
+                                  : 'Explore ${atlas!.name} with Picamo.\nAsk about the people, places, and stories within.',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Palette.muted),
+                            ),
+                            const SizedBox(height: 26),
+                            if (atlas == null)
+                              FilledButton.icon(
+                                onPressed: chooseAtlas,
+                                icon: const Icon(Icons.public),
+                                label: const Text('Choose a wiki'),
+                              )
+                            else ...[
+                              for (final q in [
+                                'What should I discover first?',
+                                'Tell me a story most people don’t know.',
+                                'Help me plan an afternoon.',
+                              ])
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: OutlinedButton(
+                                    onPressed: () => send(q),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            q,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                        const Icon(Icons.north_east, size: 16),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ],
                           if (state.atlases.isEmpty)
                             TextButton(

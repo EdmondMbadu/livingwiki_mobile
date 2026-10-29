@@ -107,15 +107,39 @@ class LivingRepository {
         .where('atlas_id', isEqualTo: atlasId)
         .limit(250)
         .get();
-    return snapshot.docs
+    final listed = snapshot.docs
         .where(
           (d) =>
               d.data()['visibility'] == 'public' &&
               d.data()['editorial_status'] == 'published' &&
               d.data()['city_listing_status'] == 'listed',
         )
-        .map((d) => Board.fromJson(d.id, d.data()))
         .toList();
+    listed.sort((a, b) {
+      final rankA = a.data()['featured_rank'] is num
+          ? intValue(a.data()['featured_rank'])
+          : 9999;
+      final rankB = b.data()['featured_rank'] is num
+          ? intValue(b.data()['featured_rank'])
+          : 9999;
+      if (rankA != rankB) return rankA.compareTo(rankB);
+      DateTime date(Json d) {
+        final value =
+            d['approved_at'] ?? d['updated_at_iso'] ?? d['server_updated_at'];
+        return value is Timestamp
+            ? value.toDate()
+            : DateTime.tryParse(stringValue(value)) ??
+                  DateTime.fromMillisecondsSinceEpoch(0);
+      }
+
+      final recent = date(b.data()).compareTo(date(a.data()));
+      return recent != 0
+          ? recent
+          : stringValue(a.data()['title']).toLowerCase().compareTo(
+              stringValue(b.data()['title']).toLowerCase(),
+            );
+    });
+    return listed.map((d) => Board.fromJson(d.id, d.data())).toList();
   }
 
   Future<Board> board(String id) async {

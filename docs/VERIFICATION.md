@@ -5,7 +5,7 @@ The native implementation uses the supplied web repository as its backend contra
 | Check | Result |
 | --- | --- |
 | Flutter static analysis | No issues |
-| Unit and widget tests | 20 tests covering schema/privacy, translation, stale edits, account-scoped saves, forms, navigation and responsive layouts |
+| Unit and widget tests | 24 tests covering schema/privacy, translation, stale edits, account-scoped saves, forms, navigation and responsive layouts |
 | Actual Firestore rules in a demo-project emulator | 5 checks passed: regular-user create, focused edit, ownership rejection, membership restriction and unlisted link access |
 | Production public SDK/API smoke | 4 checks passed: wiki directory, full boards/cards, knowledge response, Off Grids directory |
 | iPhone 17 Pro / iOS 26.2 simulator integration | Passed: app initialization, real public directory data, city navigation, boards and account screens |

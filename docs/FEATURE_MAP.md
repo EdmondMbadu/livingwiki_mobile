@@ -5,6 +5,7 @@ Source reviewed: `/Users/edmondmbadu/repo/living-wiki`. Admin routes, platform a
 | User journey | Native implementation | Existing source / connection |
 | --- | --- | --- |
 | Explore / all cities / discovery | Editorial home; searchable directory; city, university, topic, person and organization filters; pagination; map; real wiki landing pages | `app.routes.ts`, `atlas.service.ts`; `atlases` where `is_public == true` |
+| Picamo city guide | “Picamo Knows [city]” hero and original mascot, city campaign taglines, editable dinner/hidden-gem/afternoon prompts, Picamo Picks and local curiosity from published city boards; custom personas and universities retain their identity | `city-guide.ts`, `chat/chat.ts`, `chat/chat.html`; city listing rank order |
 | Public board feed | Bounded summary queries, incremental pages, search, property and tour views | `public_board_summaries`, root/public constraints; `public-board-summary.ts` |
 | Personal boards | Ownership-scoped gallery; device bookmarks; board detail; cards, notes, nested boards, sources, places, shopping links, Spotify, YouTube and videos | `boards/boards.ts`; `boards.owner_user_id`, full-board documents |
 | Make / edit a board | Titles, descriptions, cover uploads, cards, drag reordering, audience selection, drafts, deletion with confirmation | Same snake-case owner and timestamps, camel-case presentation fields; focused Studio updates and nonce |

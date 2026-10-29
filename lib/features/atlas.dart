@@ -4,6 +4,8 @@ import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../core/widgets.dart';
 import '../data/models.dart';
+import '../data/city_guide.dart';
+import 'city_guide.dart';
 import 'auth.dart';
 import 'boards.dart';
 import 'chat.dart';
@@ -19,9 +21,30 @@ class AtlasScreen extends StatefulWidget {
 
 class _AtlasScreenState extends State<AtlasScreen> {
   String tab = 'Overview';
+  Future<List<Board>>? cityBoards;
+  @override
+  void didUpdateWidget(covariant AtlasScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.atlas.id != widget.atlas.id) {
+      cityBoards = null;
+      tab = 'Overview';
+    }
+  }
+
+  Future<List<Board>> loadCityBoards() {
+    final atlasId = widget.atlas.id;
+    return cityBoards ??= AppScope.of(context).repository
+        .cityBoards(atlasId)
+        .catchError((Object error, StackTrace stack) {
+          if (widget.atlas.id == atlasId) cityBoards = null;
+          Error.throwWithStackTrace(error, stack);
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     final a = widget.atlas;
+    final picamoCity = usesPicamoCityGuide(a);
     final state = AppScope.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -44,53 +67,56 @@ class _AtlasScreenState extends State<AtlasScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: SizedBox(
-                  height: 275,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Photo(url: a.image, asset: a.localImage),
-                      const DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Color(0xD9102D20)],
+              if (picamoCity)
+                PicamoCityHero(atlas: a)
+              else
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: SizedBox(
+                    height: 275,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Photo(url: a.image, asset: a.localImage),
+                        const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.transparent, Color(0xD9102D20)],
+                            ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        left: 23,
-                        right: 23,
-                        bottom: 24,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Pill(
-                              '${a.kind.toUpperCase()} WIKI',
-                              light: true,
-                              icon: Icons.public,
-                            ),
-                            const SizedBox(height: 14),
-                            Text(
-                              a.name,
-                              style: Theme.of(context).textTheme.displayMedium
-                                  ?.copyWith(color: Colors.white),
-                            ),
-                            if (a.location.isNotEmpty)
-                              Text(
-                                a.location,
-                                style: const TextStyle(color: Colors.white70),
+                        Positioned(
+                          left: 23,
+                          right: 23,
+                          bottom: 24,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Pill(
+                                '${a.kind.toUpperCase()} WIKI',
+                                light: true,
+                                icon: Icons.public,
                               ),
-                          ],
+                              const SizedBox(height: 14),
+                              Text(
+                                a.name,
+                                style: Theme.of(context).textTheme.displayMedium
+                                    ?.copyWith(color: Colors.white),
+                              ),
+                              if (a.location.isNotEmpty)
+                                Text(
+                                  a.location,
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
               const SizedBox(height: 22),
               Row(
                 children: [
@@ -101,7 +127,7 @@ class _AtlasScreenState extends State<AtlasScreen> {
                         openScreen(context, ChatScreen(atlas: a));
                       },
                       icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-                      label: const Text('Ask this wiki'),
+                      label: Text(picamoCity ? 'Ask Picamo' : 'Ask this wiki'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -147,35 +173,117 @@ class _AtlasScreenState extends State<AtlasScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 24),
-                Surface(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Eyebrow('Start with a question'),
-                      const SizedBox(height: 12),
-                      for (final question in [
-                        'What makes ${a.name} special?',
-                        'What should I know before I visit?',
-                        'Tell me something unexpected.',
-                      ])
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            question,
-                            style: const TextStyle(fontSize: 13),
+                if (picamoCity)
+                  PicamoCityStarters(
+                    atlas: a,
+                    onSelected: (starter) {
+                      state.selectAtlas(a);
+                      openScreen(
+                        context,
+                        ChatScreen(atlas: a, draftQuestion: starter.question),
+                      );
+                    },
+                  )
+                else
+                  Surface(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Eyebrow('Start with a question'),
+                        const SizedBox(height: 12),
+                        for (final question in [
+                          'What makes ${a.name} special?',
+                          'What should I know before I visit?',
+                          'Tell me something unexpected.',
+                        ])
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              question,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                            trailing: const Icon(
+                              Icons.north_east_rounded,
+                              size: 16,
+                            ),
+                            onTap: () => openScreen(
+                              context,
+                              ChatScreen(atlas: a, initialQuestion: question),
+                            ),
                           ),
-                          trailing: const Icon(
-                            Icons.north_east_rounded,
-                            size: 16,
-                          ),
-                          onTap: () => openScreen(
-                            context,
-                            ChatScreen(atlas: a, initialQuestion: question),
-                          ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                if (picamoCity) ...[
+                  SectionHeading(
+                    'Explore ${a.name} with Picamo',
+                    subtitle: 'Picamo Picks',
+                    action: 'See all',
+                    onAction: () => setState(() => tab = 'Stories'),
+                  ),
+                  AsyncContent<List<Board>>(
+                    key: ValueKey('picamo-picks:${a.id}'),
+                    load: loadCityBoards,
+                    builder: (boards) {
+                      if (boards.isEmpty) {
+                        return const Text(
+                          'The city’s next stories are on their way. Ask Picamo where to begin.',
+                          style: TextStyle(color: Palette.muted),
+                        );
+                      }
+                      final first = boards.first;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BoardGrid(
+                            boards: boards.take(3).toList(),
+                            onTap: (board) => openScreen(
+                              context,
+                              BoardScreen(boardId: board.id),
+                            ),
+                          ),
+                          const SectionHeading('A little local curiosity'),
+                          Surface(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  first.title,
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                                if (first.description.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    first.description,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Palette.muted,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 12),
+                                TextButton.icon(
+                                  onPressed: () => openScreen(
+                                    context,
+                                    BoardScreen(boardId: first.id),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 17,
+                                  ),
+                                  label: const Text('Explore with Picamo'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
                 if (a.latitude != null && a.longitude != null)
                   MenuRow(
                     icon: Icons.map_outlined,
@@ -207,9 +315,18 @@ class _AtlasScreenState extends State<AtlasScreen> {
                 ),
               ],
               if (tab == 'Stories') ...[
-                const SectionHeading('Stories worth your time'),
+                if (picamoCity)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 26),
+                    child: Eyebrow('Picamo Picks'),
+                  ),
+                SectionHeading(
+                  picamoCity
+                      ? 'Explore ${a.name} with Picamo'
+                      : 'Stories worth your time',
+                ),
                 AsyncContent<List<Board>>(
-                  load: () => state.repository.cityBoards(a.id),
+                  load: loadCityBoards,
                   builder: (boards) => boards.isEmpty
                       ? const EmptyState(
                           title: 'The next chapter is coming',
