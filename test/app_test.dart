@@ -5,10 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:livingwiki_mobile/core/app_state.dart';
 import 'package:livingwiki_mobile/core/theme.dart';
+import 'package:livingwiki_mobile/core/widgets.dart';
 import 'package:livingwiki_mobile/data/models.dart';
 import 'package:livingwiki_mobile/data/repository.dart';
 import 'package:livingwiki_mobile/features/auth.dart';
 import 'package:livingwiki_mobile/features/board_editor.dart';
+import 'package:livingwiki_mobile/features/chat.dart';
+import 'package:livingwiki_mobile/features/voice.dart';
 import 'package:livingwiki_mobile/main.dart';
 
 class TestRepository extends LivingRepository {
@@ -24,8 +27,12 @@ class TestRepository extends LivingRepository {
           count: 3,
         ),
       ], hasMore: false);
+  final calls = <String>[];
   @override
-  Future<Json> call(String name, [Json arguments = const {}]) async => {};
+  Future<Json> call(String name, [Json arguments = const {}]) async {
+    calls.add(name);
+    return {};
+  }
 }
 
 void main() {
@@ -101,6 +108,15 @@ void main() {
   ) async {
     await pumpApp(tester, size: const Size(320, 740), textScale: 1.3);
     expect(tester.takeException(), isNull);
+    await tester.scrollUntilVisible(
+      find.text('Text me'),
+      150,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Text me'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
     await tester.tap(find.text('You').last);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
@@ -108,6 +124,88 @@ void main() {
   testWidgets('tablet home lays out correctly', (tester) async {
     await pumpApp(tester, size: const Size(1024, 1366));
     expect(find.text('The world has\nstories. Find yours.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('landing text mode picks a wiki and opens its conversation', (
+    tester,
+  ) async {
+    state.atlases = [
+      const Atlas(
+        id: 'philly',
+        name: 'Philadelphia',
+        slug: 'philly',
+        kind: 'city',
+      ),
+    ];
+    await pumpApp(tester);
+    expect(find.byType(LivingWikiBrand), findsOneWidget);
+    await tester.tap(find.text('Text me'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Start chatting'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start chatting'));
+    await tester.pumpAndSettle();
+    expect(find.text('Where shall we explore?'), findsOneWidget);
+    await tester.tap(find.text('Philadelphia'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ChatScreen), findsOneWidget);
+    expect(state.selectedAtlas?.id, 'philly');
+    expect(
+      tester.widget<TextField>(find.byType(TextField).last).enabled,
+      isTrue,
+    );
+    expect((state.repository as TestRepository).calls, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets(
+    'landing voice mode opens a preview without starting the microphone',
+    (tester) async {
+      state.selectedAtlas = const Atlas(
+        id: 'philly',
+        name: 'Philadelphia',
+        slug: 'philly',
+        kind: 'city',
+      );
+      await pumpApp(tester);
+      await tester.ensureVisible(find.text('Start talking'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Start talking'));
+      // Voice has a continuous pulse animation; wait only for route transition.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(VoiceScreen), findsOneWidget);
+      expect(find.text('Talk with Picamo'), findsOneWidget);
+      expect(find.text('Philadelphia'), findsOneWidget);
+      expect(
+        find.image(const AssetImage('assets/images/picamo-city-guide.webp')),
+        findsOneWidget,
+      );
+      expect(find.text('Start a conversation'), findsOneWidget);
+      expect((state.repository as TestRepository).calls, isEmpty);
+      expect(tester.takeException(), isNull);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Philadelphia · Change wiki'), findsOneWidget);
+    },
+  );
+  testWidgets('dismissing the wiki picker keeps the landing mode ready', (
+    tester,
+  ) async {
+    state.atlases = [
+      const Atlas(id: 'philly', name: 'Philadelphia', slug: 'philly'),
+    ];
+    await pumpApp(tester);
+    await tester.tap(find.text('Text me'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Start chatting'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start chatting'));
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.text('Where shall we explore?'))).pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(ChatScreen), findsNothing);
+    expect(find.text('Start chatting'), findsOneWidget);
+    expect(state.selectedAtlas, isNull);
     expect(tester.takeException(), isNull);
   });
   testWidgets('auth validates input without making a backend request', (

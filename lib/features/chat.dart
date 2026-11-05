@@ -9,6 +9,7 @@ import 'city_guide.dart';
 import 'auth.dart';
 import 'explore.dart';
 import 'voice.dart';
+import 'conversation_picker.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -115,15 +116,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> chooseAtlas() async {
     final state = AppScope.of(context);
-    final chosen = await showModalBottomSheet<Atlas>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) => SizedBox(
-        height: MediaQuery.sizeOf(ctx).height * .75,
-        child: _WikiPicker(atlases: state.atlases),
-      ),
-    );
+    final chosen = await chooseConversationWiki(context);
     if (chosen == null || !mounted) return;
     state.selectAtlas(chosen);
     setState(() {
@@ -178,6 +171,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         title: atlas!.name,
                         image: atlas!.image,
                         atlasId: atlas!.id,
+                        picamoGuide: usesPicamoCityGuide(atlas!),
                       ),
                     ),
               icon: const Icon(Icons.mic_none_rounded),
@@ -511,62 +505,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _WikiPicker extends StatefulWidget {
-  const _WikiPicker({required this.atlases});
-  final List<Atlas> atlases;
-  @override
-  State<_WikiPicker> createState() => _WikiPickerState();
-}
-
-class _WikiPickerState extends State<_WikiPicker> {
-  String query = '';
-  @override
-  Widget build(BuildContext context) {
-    final state = AppScope.of(context);
-    final items = state.atlases
-        .where((a) => a.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Find a wiki',
-              prefixIcon: Icon(Icons.search),
-            ),
-            onChanged: (v) => setState(() => query = v),
-          ),
-        ),
-        Expanded(
-          child: ListView(
-            children: [
-              if (state.selectedAtlas != null &&
-                  !items.any((a) => a.id == state.selectedAtlas!.id))
-                ListTile(
-                  title: Text(state.selectedAtlas!.name),
-                  onTap: () => Navigator.pop(context, state.selectedAtlas),
-                ),
-              for (final a in items)
-                ListTile(
-                  leading: const Icon(Icons.public),
-                  title: Text(a.name),
-                  subtitle: Text(a.kind),
-                  onTap: () => Navigator.pop(context, a),
-                ),
-              if (state.moreAtlases)
-                TextButton(
-                  onPressed: () => state.loadAtlases(),
-                  child: const Text('Load more wikis'),
-                ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

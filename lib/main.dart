@@ -78,20 +78,7 @@ class _BootstrapState extends State<Bootstrap> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(
-                        'assets/images/brand.png',
-                        width: 64,
-                        height: 64,
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'LivingWiki',
-                        style: TextStyle(
-                          fontFamily: 'Newsreader',
-                          fontSize: 36,
-                          color: Palette.ink,
-                        ),
-                      ),
+                      const LivingWikiBrand(),
                       const SizedBox(height: 10),
                       const Text(
                         'A world worth knowing.',
@@ -231,25 +218,7 @@ class _AppShellState extends State<AppShell> {
           ? AppBar(
               titleSpacing: 24,
               toolbarHeight: 70,
-              title: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset('assets/images/brand.png', width: 30, height: 30),
-                  const SizedBox(width: 9),
-                  const Flexible(
-                    child: Text(
-                      'LivingWiki',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Newsreader',
-                        fontSize: 28,
-                        letterSpacing: -.8,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              title: const LivingWikiBrand(),
               actions: [
                 IconButton(
                   tooltip: 'Your updates',

@@ -162,7 +162,12 @@ class _AtlasScreenState extends State<AtlasScreen> {
                   subtitle: 'Get to know this wiki by voice',
                   onTap: () => openScreen(
                     context,
-                    VoiceScreen(title: a.name, image: a.image, atlasId: a.id),
+                    VoiceScreen(
+                      title: a.name,
+                      image: a.image,
+                      atlasId: a.id,
+                      picamoGuide: usesPicamoCityGuide(a),
+                    ),
                   ),
                 ),
                 SectionHeading('Every place has a soul.'),

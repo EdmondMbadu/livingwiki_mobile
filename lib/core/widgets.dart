@@ -6,6 +6,53 @@ import '../data/models.dart';
 import 'app_state.dart';
 import 'theme.dart';
 
+class LivingWikiBrand extends StatelessWidget {
+  const LivingWikiBrand({super.key});
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: 'LivingWiki',
+    image: true,
+    excludeSemantics: true,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset(
+          'assets/images/livingwiki-crane.png',
+          width: 44,
+          height: 36,
+        ),
+        const SizedBox(width: 7),
+        Flexible(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Living',
+                  style: TextStyle(color: Color(0xFF1EA64A)),
+                ),
+                TextSpan(
+                  text: 'Wiki',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'Roboto',
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 void openScreen(BuildContext context, Widget screen) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
 void toast(BuildContext context, String message) => ScaffoldMessenger.of(
@@ -527,7 +574,7 @@ class BusyButton extends StatelessWidget {
                 Icon(icon, size: 18),
                 const SizedBox(width: 9),
               ],
-              Text(label),
+              Flexible(child: Text(label, textAlign: TextAlign.center)),
             ],
           ),
   );

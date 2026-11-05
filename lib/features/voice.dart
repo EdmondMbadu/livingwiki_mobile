@@ -15,9 +15,11 @@ class VoiceScreen extends StatefulWidget {
     this.boardId,
     this.cardId,
     this.image = '',
+    this.picamoGuide = false,
   });
   final String title, image;
   final String? atlasId, boardId, cardId;
+  final bool picamoGuide;
   @override
   State<VoiceScreen> createState() => _VoiceScreenState();
 }
@@ -45,7 +47,11 @@ class _VoiceScreenState extends State<VoiceScreen>
           if (mounted) {
             setState(
               () => transcript.add({
-                'role': source == Role.user ? 'You' : widget.title,
+                'role': source == Role.user
+                    ? 'You'
+                    : widget.picamoGuide
+                    ? 'Picamo'
+                    : widget.title,
                 'text': message,
               }),
             );
@@ -160,7 +166,10 @@ class _VoiceScreenState extends State<VoiceScreen>
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Wonder out loud', style: TextStyle(fontSize: 15)),
+      title: Text(
+        widget.picamoGuide ? 'Talk with Picamo' : 'Wonder out loud',
+        style: const TextStyle(fontSize: 15),
+      ),
     ),
     body: Center(
       child: ConstrainedBox(
@@ -170,7 +179,9 @@ class _VoiceScreenState extends State<VoiceScreen>
           children: [
             Center(
               child: Eyebrow(
-                widget.cardId == null
+                widget.picamoGuide
+                    ? 'Your curious city guide'
+                    : widget.cardId == null
                     ? 'A conversation with a wiki'
                     : 'A living, talking story',
               ),
@@ -207,16 +218,29 @@ class _VoiceScreenState extends State<VoiceScreen>
                       ],
                     ),
                     child: Center(
-                      child: ClipOval(
-                        child: widget.image.isNotEmpty
-                            ? Photo(url: widget.image, width: 140, height: 140)
-                            : Image.asset(
-                                'assets/images/picamo.webp',
-                                width: 140,
-                                height: 140,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
+                      child: widget.picamoGuide
+                          ? Image.asset(
+                              'assets/images/picamo-city-guide.webp',
+                              width: 140,
+                              height: 180,
+                              fit: BoxFit.contain,
+                              semanticLabel:
+                                  'Picamo, your guide to ${widget.title}',
+                            )
+                          : ClipOval(
+                              child: widget.image.isNotEmpty
+                                  ? Photo(
+                                      url: widget.image,
+                                      width: 140,
+                                      height: 140,
+                                    )
+                                  : Image.asset(
+                                      'assets/images/picamo.webp',
+                                      width: 140,
+                                      height: 140,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
                     ),
                   ),
                 ),

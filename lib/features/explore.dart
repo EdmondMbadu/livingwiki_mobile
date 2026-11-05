@@ -11,6 +11,7 @@ import 'boards.dart';
 import 'gems.dart';
 import 'chat.dart';
 import 'nearby_gems.dart';
+import 'picamo_welcome.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -84,45 +85,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 style: Theme.of(context).textTheme.displayMedium,
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Meet Picamo.',
-                          style: Theme.of(context).textTheme.headlineMedium
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Your curiosity companion.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Little-known places. Big ideas. A little wonder.',
-                          style: TextStyle(color: Palette.muted, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Image.asset(
-                    'assets/images/picamo-city-guide.webp',
-                    width: 112,
-                    height: 152,
-                    fit: BoxFit.contain,
-                    semanticLabel: 'Picamo, your friendly guide, holding a map',
-                  ),
-                ],
-              ),
+              const PicamoWelcome(),
               const SizedBox(height: 22),
               InkWell(
                 borderRadius: BorderRadius.circular(17),
